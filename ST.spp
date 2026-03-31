@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+typedef long long int ll;
+
+struct Sparse_table{
+    int size;
+    vector<ll> powers, nums;
+    vector<vector<ll>> sparse;
+
+    void build(vector<ll>& arr){
+        size = arr.size();
+        powers.resize(size + 1, 0);
+        for (int i = 2; i <= size; i++){
+            powers[i] = powers[(i - 1) / 2] + 1;
+        }
+        sparse.resize(powers.back() + 1, vector<ll>(size, 100000000000));
+        for (int i = 0; i < size; i++){
+            sparse[0][i] = arr[i];
+        }
+        for (int k = 1; (1 << k) <= size; k++){
+            for (int i = 0; i < size; i++){
+                if (i + (1 << k) >= size){
+                    break;
+                }
+                sparse[k][i] = min(sparse[k - 1][i], sparse[k - 1][i + (1 << (k - 1))]);
+            }
+        }
+        for (int i = 1; i <= powers.back(); i++){
+            for (int j = 0; j < size; j++){
+                sparse[i][j] = min(sparse[i][j], sparse[i - 1][j]);
+            }
+        }
+    }
+
+    int get_min(int l, int r){
+        return min(sparse[powers[r - l]][l], sparse[powers[r - l]][r - (1 << powers[r - l])]);
+    }
+};
